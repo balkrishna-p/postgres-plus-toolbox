@@ -1,0 +1,14 @@
+// Example: inspect slow operations from system.profile
+// Enable profiling appropriately in your environment before using.
+
+db.system.profile.find(
+  { millis: { $gte: 100 } },   // operations slower than 100ms
+  {
+    ts: 1,
+    op: 1,
+    ns: 1,
+    millis: 1,
+    command: 1,
+    query: 1
+  }
+).sort({ ts: -1 }).limit(50);
