@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  pg-primary:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: example
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_primary_data:/var/lib/postgresql/data
+
+  pg-replica:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_HOST_AUTH_METHOD: trust
+    depends_on:
+      - pg-primary
+    ports:
+      - "5433:5432"
+    command: >
+      bash -c "
+      rm -rf /var/lib/postgresql/data/* &&
+      PGPASSWORD=example pg_basebackup -h pg-primary -D /var/lib/postgresql/data -U postgres -Fp -Xs -P -R &&
+      exec postgres
+      "
+
+volumes:
+  pg_primary_data:
